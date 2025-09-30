@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
+  Pressable,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -77,9 +78,9 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>App 1 - Fotos de lugares visitados</Text>
+        <Text style={styles.header}>My App - Fotos de lugares visitados</Text>
 
-        {/* Exibe a imagem ou placeholder */}
+        
         <View style={styles.imageContainer}>
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.image} />
@@ -88,7 +89,7 @@ export default function App() {
           )}
         </View>
 
-        {/* Campo de texto */}
+       
         <TextInput
           style={styles.input}
           placeholder="Digite algo sobre a foto/local..."
@@ -96,13 +97,30 @@ export default function App() {
           onChangeText={setTitle}
         />
 
-        {/* Botões */}
+       
         <View style={styles.buttonContainer}>
-          <Button title="Tirar Foto" onPress={handleTakePhoto} />
-          <Button title="Localizar no mapa" onPress={handleGetLocation} />
-        </View>
+  <Pressable
+    style={({ pressed }) => [
+      styles.button,
+      { backgroundColor: pressed ? "#E65100" : "#FF6F00" }, // escurece ao pressionar
+    ]}
+    onPress={handleTakePhoto}
+  >
+    <Text style={styles.buttonText}>Tirar Foto</Text>
+  </Pressable>
 
-        {/* Mapa */}
+  <Pressable
+    style={({ pressed }) => [
+      styles.button,
+      { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
+    ]}
+    onPress={handleGetLocation}
+  >
+    <Text style={styles.buttonText}>Localizar no mapa</Text>
+  </Pressable>
+</View>
+
+        
         <View style={styles.mapContainer}>
           {location ? (
             <MapView
@@ -131,7 +149,7 @@ export default function App() {
   );
 }
 
-// Estilos em React Native
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -190,4 +208,19 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+button: {
+  flex: 1,
+  marginHorizontal: 5,
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: "center",
+  justifyContent: "center",
+},
+buttonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "600",
+}
+
+
 });
