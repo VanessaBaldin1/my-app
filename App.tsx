@@ -230,11 +230,11 @@ export default function App() {
 
         <View style={estilos.caixaBotoes}>
           <Pressable style={estilos.botaoLaranja} onPress={tirarFoto}>
-            <Text style={estilos.textoBotao}>📷 Tirar Foto</Text>
+            <Text style={estilos.textoBotao}> Tirar Foto</Text>
           </Pressable>
 
           <Pressable style={estilos.botaoLaranja} onPress={obterLocalizacao}>
-            <Text style={estilos.textoBotao}>📍 Localizar</Text>
+            <Text style={estilos.textoBotao}> Localizar</Text>
           </Pressable>
         </View>
 
@@ -266,11 +266,11 @@ export default function App() {
         {/* Botões lado a lado */}
         <View style={estilos.caixaBotoes}>
           <Pressable style={estilos.botaoCinza} onPress={limparDadosSalvos}>
-            <Text style={estilos.textoCinza}>🗑️ Limpar informações</Text>
+            <Text style={estilos.textoCinza}> Limpar Informações</Text>
           </Pressable>
 
           <Pressable style={estilos.botaoVermelho} onPress={apagarFotosSalvas}>
-            <Text style={estilos.textoBranco}>🖼️ Limpar fotos salvas</Text>
+            <Text style={estilos.textoBranco}> Limpar Fotos Salvas</Text>
           </Pressable>
         </View>
 
@@ -354,7 +354,7 @@ const estilos = StyleSheet.create({
     marginHorizontal: 5,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: "#eeeeee",
+    backgroundColor: "#ff5252",
     alignItems: "center",
   },
   botaoVermelho: {
@@ -366,7 +366,7 @@ const estilos = StyleSheet.create({
     alignItems: "center",
   },
   textoBotao: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  textoCinza: { color: "#333", fontSize: 15 },
+  textoCinza: { color: "#fff", fontSize: 15, fontWeight: "600" },
   textoBranco: { color: "#fff", fontSize: 15, fontWeight: "600" },
   caixaMapa: {
     width: "100%",
