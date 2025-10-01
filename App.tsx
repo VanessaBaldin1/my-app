@@ -83,7 +83,7 @@ export default function App() {
       const resultado = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         quality: 0.7,
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: "images",
       });
 
       if (resultado.canceled) {
