@@ -15,7 +15,7 @@ import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// 🔑 Chaves do AsyncStorage
+// Chaves do AsyncStorage
 const FOTO_KEY = "@meuapp:foto";
 const TITULO_KEY = "@meuapp:titulo";
 
@@ -33,7 +33,7 @@ export default function App() {
   const [temPermissaoLocalizacao, setTemPermissaoLocalizacao] =
     useState<boolean>(false);
 
-  // 🔄 Carrega foto e título ao iniciar
+  // Carrega foto e título ao iniciar
   useEffect(() => {
     (async () => {
       try {
@@ -48,7 +48,7 @@ export default function App() {
     })();
   }, []);
 
-  // 📍 Permissão de localização
+  // Permissão de localização
   useEffect(() => {
     (async () => {
       try {
@@ -68,7 +68,7 @@ export default function App() {
     })();
   }, []);
 
-  // 📸 Tirar foto
+  // Tirar foto
   const tirarFoto = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -91,7 +91,7 @@ export default function App() {
         return;
       }
 
-      // 🔑 Pega a URI correta da foto
+      // Pega a URI correta da foto
       const uri = resultado.assets?.[0]?.uri;
       if (!uri) {
         console.log("⚠️ Nenhuma URI de foto retornada:", resultado);
@@ -108,7 +108,7 @@ export default function App() {
     }
   };
 
-  // ✍️ Atualizar título
+  //  Atualizar título
   const atualizarTitulo = async (texto: string) => {
     setTitulo(texto);
     try {
@@ -118,7 +118,7 @@ export default function App() {
     }
   };
 
-  // 🌍 Obter localização
+  //  Obter localização
   const obterLocalizacao = async () => {
     if (!temPermissaoLocalizacao) {
       Alert.alert(
@@ -139,7 +139,7 @@ export default function App() {
     }
   };
 
-  // 🧹 Limpar dados
+  //  Limpar dados
   const limparDadosSalvos = async () => {
     try {
       await AsyncStorage.multiRemove([FOTO_KEY, TITULO_KEY]);
@@ -154,95 +154,92 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={estilos.safeArea}>
-      <ScrollView contentContainerStyle={estilos.container}>
-        <Text style={estilos.tituloApp}>📍 Meu App - Lugares Visitados</Text>
+    <>
+      <SafeAreaView style={estilos.safeArea}>
+        <ScrollView contentContainerStyle={estilos.container}>
+          <Text style={estilos.tituloApp}>Meu App - Lugares Visitados</Text>
 
-        {/* 📸 Foto */}
-        <View style={estilos.caixaImagem}>
-          {fotoUri ? (
-            <Image
-              source={{ uri: fotoUri }}
-              style={estilos.imagem}
-              resizeMode="cover"
-            />
-          ) : (
-            <Text style={estilos.textoPlaceholder}>Nenhuma foto tirada</Text>
-          )}
-        </View>
+          <View style={estilos.caixaImagem}>
+            {fotoUri ? (
+              <Image
+                source={{ uri: fotoUri }}
+                style={estilos.imagem}
+                resizeMode="cover"
+              />
+            ) : (
+              <Text style={estilos.textoPlaceholder}>Nenhuma foto tirada</Text>
+            )}
+          </View>
 
-        {/* 📝 Texto */}
-        <TextInput
-          style={estilos.input}
-          placeholder="Digite algo sobre a foto/local..."
-          value={titulo}
-          onChangeText={atualizarTitulo}
-        />
+          <TextInput
+            style={estilos.input}
+            placeholder="Digite algo sobre a foto/local..."
+            value={titulo}
+            onChangeText={atualizarTitulo}
+          />
 
-        {/* 🔘 Botões */}
-        <View style={estilos.caixaBotoes}>
-          <Pressable
-            style={({ pressed }) => [
-              estilos.botao,
-              { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
-            ]}
-            onPress={tirarFoto}
-          >
-            <Text style={estilos.textoBotao}>📷 Tirar Foto</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              estilos.botao,
-              { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
-            ]}
-            onPress={obterLocalizacao}
-          >
-            <Text style={estilos.textoBotao}>🗺️ Localizar</Text>
-          </Pressable>
-        </View>
-
-        {/* 🧹 Botão limpar */}
-        <View style={{ width: "100%", marginBottom: 12 }}>
-          <Pressable
-            style={({ pressed }) => [
-              estilos.botaoLimpar,
-              { backgroundColor: pressed ? "#ddd" : "#efefef" },
-            ]}
-            onPress={limparDadosSalvos}
-          >
-            <Text>🧹 Apagar dados salvos</Text>
-          </Pressable>
-        </View>
-
-        {/* 🌍 Mapa */}
-        <View style={estilos.caixaMapa}>
-          {localizacao ? (
-            <MapView
-              style={estilos.mapa}
-              initialRegion={{
-                latitude: localizacao.coords.latitude,
-                longitude: localizacao.coords.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
+          <View style={estilos.caixaBotoes}>
+            <Pressable
+              style={({ pressed }) => [
+                estilos.botao,
+                { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
+              ]}
+              onPress={tirarFoto}
             >
-              <Marker
-                coordinate={{
+              <Text style={estilos.textoBotao}> Tirar Foto</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                estilos.botao,
+                { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
+              ]}
+              onPress={obterLocalizacao}
+            >
+              <Text style={estilos.textoBotao}> Localizar</Text>
+            </Pressable>
+          </View>
+
+          <View style={{ width: "100%", marginBottom: 12 }}>
+            <Pressable
+              style={({ pressed }) => [
+                estilos.botaoLimpar,
+                { backgroundColor: pressed ? "#ddd" : "#efefef" },
+              ]}
+              onPress={limparDadosSalvos}
+            >
+              <Text> Apagar dados salvos</Text>
+            </Pressable>
+          </View>
+
+          <View style={estilos.caixaMapa}>
+            {localizacao ? (
+              <MapView
+                style={estilos.mapa}
+                initialRegion={{
                   latitude: localizacao.coords.latitude,
                   longitude: localizacao.coords.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
                 }}
-                title={titulo || "Local da Foto"}
-              />
-            </MapView>
-          ) : (
-            <Text style={estilos.textoPlaceholder}>
-              Localização não definida
-            </Text>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+              >
+                <Marker
+                  coordinate={{
+                    latitude: localizacao.coords.latitude,
+                    longitude: localizacao.coords.longitude,
+                  }}
+                  title={titulo || "Local da Foto"}
+                />
+              </MapView>
+            ) : (
+              <Text style={estilos.textoPlaceholder}>
+                Localização não definida
+              </Text>
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
 
