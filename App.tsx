@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  FlatList,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Localizacao from "expo-location";
@@ -32,6 +33,22 @@ export default function App() {
   const [titulo, setTitulo] = useState<string>("");
   const [temPermissaoLocalizacao, setTemPermissaoLocalizacao] =
     useState<boolean>(false);
+
+  const [fotos, setFotos] = useState<string[]>([]);
+
+  useEffect(() => {
+    const carregarFotos = async () => {
+      try {
+        const fotosSalvas = await AsyncStorage.getItem("fotos");
+        if (fotosSalvas) {
+          setFotos(JSON.parse(fotosSalvas));
+        }
+      } catch (error) {
+        console.error("erro ao carreagr fotos", error);
+      }
+    };
+    carregarFotos();
+  }, []);
 
   // Carrega foto e título ao iniciar
   useEffect(() => {
@@ -91,7 +108,6 @@ export default function App() {
         return;
       }
 
-      // Pega a URI correta da foto
       const uri = resultado.assets?.[0]?.uri;
       if (!uri) {
         console.log("⚠️ Nenhuma URI de foto retornada:", resultado);
@@ -99,12 +115,64 @@ export default function App() {
         return;
       }
 
-      setFotoUri(uri);
-      await AsyncStorage.setItem(FOTO_KEY, uri);
+      // 🔁 Tenta salvar na lista de fotos do AsyncStorage
+      try {
+        const fotosSalvas = await AsyncStorage.getItem("fotos");
+        const lista = fotosSalvas ? JSON.parse(fotosSalvas) : [];
+
+        const novasFotos = [...lista, uri];
+
+        await AsyncStorage.setItem("fotos", JSON.stringify(novasFotos));
+
+        // Atualiza o estado local
+        setFotos(novasFotos); // <== seu array de fotos
+        setFotoUri(uri); // <== a última tirada
+      } catch (error) {
+        console.error("Erro ao salvar foto no AsyncStorage:", error);
+        Alert.alert("Erro", "Não foi possível salvar a foto.");
+      }
+
       console.log("📸 Foto salva:", uri);
     } catch (err) {
       console.log("Erro ao abrir câmera:", err);
       Alert.alert("Erro", "Ocorreu um erro ao abrir a câmera.");
+    }
+  };
+  //teste
+  const salvarLugarVisitado = async () => {
+    if (!fotoUri || !localizacao || !titulo.trim()) {
+      Alert.alert(
+        "Erro",
+        "Preencha todos os dados (foto, localização, título)"
+      );
+      return;
+    }
+
+    const novoLugar = {
+      id: Date.now().toString(),
+      titulo,
+      fotoUri,
+      localizacao,
+    };
+
+    try {
+      const dadosSalvos = await AsyncStorage.getItem("@lugares");
+      const lista: (typeof novoLugar)[] = dadosSalvos
+        ? JSON.parse(dadosSalvos)
+        : [];
+
+      lista.push(novoLugar);
+      await AsyncStorage.setItem("@lugares", JSON.stringify(lista));
+
+      Alert.alert("Sucesso", "Lugar salvo com sucesso!");
+
+      // Limpar os campos
+      setTitulo("");
+      setFotoUri(null);
+      setLocalizacao(null);
+    } catch (err) {
+      console.log("Erro ao salvar:", err);
+      Alert.alert("Erro", "Não foi possível salvar o lugar.");
     }
   };
 
@@ -153,92 +221,147 @@ export default function App() {
     }
   };
 
+  const apagarFotosSalvas = async () => {
+    try {
+      await AsyncStorage.removeItem("fotos");
+      setFotos([]); // limpa a lista no estado
+      Alert.alert("Sucesso", "Todas as fotos foram apagadas.");
+    } catch (err) {
+      console.error("Erro ao apagar fotos:", err);
+      Alert.alert("Erro", "Não foi possível apagar as fotos.");
+    }
+  };
+
   return (
     <>
-      <SafeAreaView style={estilos.safeArea}>
-        <ScrollView contentContainerStyle={estilos.container}>
-          <Text style={estilos.tituloApp}>Meu App - Lugares Visitados</Text>
+      return (
+      <>
+        <SafeAreaView style={estilos.safeArea}>
+          <ScrollView contentContainerStyle={estilos.container}>
+            <Text style={estilos.tituloApp}>Meu App - Lugares Visitados</Text>
 
-          <View style={estilos.caixaImagem}>
-            {fotoUri ? (
-              <Image
-                source={{ uri: fotoUri }}
-                style={estilos.imagem}
-                resizeMode="cover"
-              />
-            ) : (
-              <Text style={estilos.textoPlaceholder}>Nenhuma foto tirada</Text>
-            )}
-          </View>
+            <View style={estilos.caixaImagem}>
+              {fotoUri ? (
+                <Image
+                  source={{ uri: fotoUri }}
+                  style={estilos.imagem}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text style={estilos.textoPlaceholder}>
+                  Nenhuma foto tirada
+                </Text>
+              )}
+            </View>
 
-          <TextInput
-            style={estilos.input}
-            placeholder="Digite algo sobre a foto/local..."
-            value={titulo}
-            onChangeText={atualizarTitulo}
-          />
+            <TextInput
+              style={estilos.input}
+              placeholder="Digite algo sobre a foto/local..."
+              value={titulo}
+              onChangeText={atualizarTitulo}
+            />
 
-          <View style={estilos.caixaBotoes}>
-            <Pressable
-              style={({ pressed }) => [
-                estilos.botao,
-                { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
-              ]}
-              onPress={tirarFoto}
-            >
-              <Text style={estilos.textoBotao}> Tirar Foto</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                estilos.botao,
-                { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
-              ]}
-              onPress={obterLocalizacao}
-            >
-              <Text style={estilos.textoBotao}> Localizar</Text>
-            </Pressable>
-          </View>
-
-          <View style={{ width: "100%", marginBottom: 12 }}>
-            <Pressable
-              style={({ pressed }) => [
-                estilos.botaoLimpar,
-                { backgroundColor: pressed ? "#ddd" : "#efefef" },
-              ]}
-              onPress={limparDadosSalvos}
-            >
-              <Text> Apagar dados salvos</Text>
-            </Pressable>
-          </View>
-
-          <View style={estilos.caixaMapa}>
-            {localizacao ? (
-              <MapView
-                style={estilos.mapa}
-                initialRegion={{
-                  latitude: localizacao.coords.latitude,
-                  longitude: localizacao.coords.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
+            <View style={estilos.caixaBotoes}>
+              <Pressable
+                style={({ pressed }) => [
+                  estilos.botao,
+                  { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
+                ]}
+                onPress={tirarFoto}
               >
-                <Marker
-                  coordinate={{
+                <Text style={estilos.textoBotao}> Tirar Foto</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  estilos.botao,
+                  { backgroundColor: pressed ? "#E65100" : "#FF6F00" },
+                ]}
+                onPress={obterLocalizacao}
+              >
+                <Text style={estilos.textoBotao}> Localizar</Text>
+              </Pressable>
+            </View>
+
+            {/* 🔁 Lista de Fotos Salvas */}
+            {fotos.length > 0 && (
+              <View style={{ marginVertical: 20, width: "100%" }}>
+                <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
+                  Fotos salvas:
+                </Text>
+                <FlatList
+                  data={fotos}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <Image
+                      source={{ uri: item }}
+                      style={{
+                        width: 100,
+                        height: 100,
+                        marginRight: 10,
+                        borderRadius: 8,
+                      }}
+                    />
+                  )}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            )}
+
+            <View style={{ width: "100%", marginBottom: 12 }}>
+              <Pressable
+                style={({ pressed }) => [
+                  estilos.botaoLimpar,
+                  { backgroundColor: pressed ? "#ddd" : "#efefef" },
+                ]}
+                onPress={limparDadosSalvos}
+              >
+                <Text> Apagar dados salvos</Text>
+              </Pressable>
+            </View>
+
+            <View style={{ width: "100%", marginBottom: 12 }}>
+              <Pressable
+                style={({ pressed }) => [
+                  estilos.botaoLimpar,
+                  { backgroundColor: pressed ? "#ddd" : "#efefef" },
+                ]}
+                onPress={apagarFotosSalvas}
+              >
+                <Text> Apagar fotos listadas</Text>
+              </Pressable>
+            </View>
+
+            <View style={estilos.caixaMapa}>
+              {localizacao ? (
+                <MapView
+                  style={estilos.mapa}
+                  initialRegion={{
                     latitude: localizacao.coords.latitude,
                     longitude: localizacao.coords.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
                   }}
-                  title={titulo || "Local da Foto"}
-                />
-              </MapView>
-            ) : (
-              <Text style={estilos.textoPlaceholder}>
-                Localização não definida
-              </Text>
-            )}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+                >
+                  <Marker
+                    coordinate={{
+                      latitude: localizacao.coords.latitude,
+                      longitude: localizacao.coords.longitude,
+                    }}
+                    title={titulo || "Local da Foto"}
+                  />
+                </MapView>
+              ) : (
+                <Text style={estilos.textoPlaceholder}>
+                  Localização não definida
+                </Text>
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </>
+      );
     </>
   );
 }
@@ -301,4 +424,9 @@ const estilos = StyleSheet.create({
     overflow: "hidden",
   },
   mapa: { flex: 1 },
+
+  titulo: {
+    marginTop: 20,
+    fontWeight: "bold",
+  },
 });
